@@ -1,0 +1,11 @@
+node_modules
+.expo
+.expo-shared
+.git
+.vscode
+dist
+*.log
+*.env
+*.DS_Store
+*.swp
+*.tmp
