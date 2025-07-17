@@ -1,35 +1,30 @@
-# Stage 1: Build the static website using Expo Web
+# Step 1: Build stage using Node.js
 FROM node:18 AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy only package files to install dependencies
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy the rest of the app
+# Copy all source code
 COPY . .
 
-# Install webpack config for export
-RUN npm install --save-dev @expo/webpack-config
+# Force install the compatible webpack config (avoiding peer conflict)
+RUN npm install --save-dev @expo/webpack-config --legacy-peer-deps
 
-# Optional: Create a minimal webpack.config.js (Expo can auto-detect too)
+# Optional: generate default webpack.config.js if missing
 RUN echo "module.exports = async function(env, argv) { const { withExpo } = require('@expo/webpack-config'); return await withExpo(env, argv); };" > webpack.config.js
 
-# Export the web build
+# Export the static web app (output goes to /app/dist)
 RUN npx expo export:web
 
-# Stage 2: Serve using Nginx
+# Step 2: Serve stage using Nginx
 FROM nginx:alpine
 
-# Copy build files to Nginx's public directory
+# Copy build output to Nginx's public directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose HTTP port
+# Expose port and start server
 EXPOSE 80
-
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
