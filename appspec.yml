@@ -1,0 +1,27 @@
+version: 0.0
+os: linux
+
+files:
+  - source: sampleApp/
+    destination: /home/ec2-user/sampleApp
+
+hooks:
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: ec2-user
+
+  AfterInstall:
+    - location: scripts/start_app.sh
+      timeout: 300
+      runas: ec2-user
+
+  ApplicationStop:
+    - location: scripts/stop_app.sh
+      timeout: 300
+      runas: ec2-user
+
+  ApplicationStart:
+    - location: scripts/ensure_app_is_running.sh
+      timeout: 300
+      runas: ec2-user
